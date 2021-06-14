@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+import os
+import time
+import argparse
+
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+def strtime(t):
+    return time.strftime(TIME_FORMAT, time.localtime(t))
+
+def rus(command):
+    start = time.time()
+    cmd = ' '.join(command)
+    print('[+] rus start at %s' % strtime(start))
+    print('[+] rus command : "%s"' % cmd)
+
+    while True:
+        r = os.system(cmd)
+        if r == 0:
+            end = time.time()
+            print("[+] Run Success at %s" % strtime(end))
+            print("[+] Run %d Seconds" % (end - start))
+            break
+        print('[!] Failed to Run Cmd at %s, Retry ...' % strtime(time.time()))
+        time.sleep(3)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('command', nargs='+', help='command to run');
+    
+    opt = parser.parse_args()
+
+    rus(opt.command)
+
+
+if __name__ == '__main__':
+	main()
