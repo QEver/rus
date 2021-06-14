@@ -5,34 +5,47 @@ import argparse
 
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-def strtime(t):
-    return time.strftime(TIME_FORMAT, time.localtime(t))
 
-def rus(command):
-    start = time.time()
-    cmd = ' '.join(command)
-    print('[+] rus start at %s' % strtime(start))
-    print('[+] rus command : "%s"' % cmd)
+class RunUntilSuccess(object):
+    def __init__(self):
+        self.silent = False
+        self.delay = 3
+        self.time_format = TIME_FORMAT
 
-    while True:
-        r = os.system(cmd)
-        if r == 0:
-            end = time.time()
-            print("[+] Run Success at %s" % strtime(end))
-            print("[+] Run %d Seconds" % (end - start))
-            break
-        print('[!] Failed to Run Cmd at %s, Retry ...' % strtime(time.time()))
-        time.sleep(3)
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('command', nargs='+', help='command to run');
+    def start(self):
+        #TODO: fix command with all args end
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-d', '--delay', type=int, dest='delay', default=3, help='delay time with seconds');
+        parser.add_argument('-s', '--silent', dest='silent', default=False, action='store_true', help='do not print info');
     
-    opt = parser.parse_args()
+        opt, command = parser.parse_known_args()
+        
+        if opt.silent:
+            self.silent = True
+        self.delay = opt.delay        
 
-    rus(opt.command)
+        self.run(command)
+    
+    def run(self, command):
+        start = time.time()
+        cmd = ' '.join(command)
+        print('[+] rus start at %s' % self.strtime(start))
+        print('[+] rus command : "%s"' % cmd)
+
+        while True:
+            r = os.system(cmd)
+            if r == 0:
+                end = time.time()
+                print("[+] Run Success at %s" % self.strtime(end))
+                print("[+] Run %d Seconds" % (end - start))
+                break
+            print('[!] Failed to Run Cmd at %s, Retry ...' % self.strtime(time.time()))
+            time.sleep(self.delay)
+    
+    def strtime(self, t):
+        return time.strftime(self.time_format, time.localtime(t))
 
 
 if __name__ == '__main__':
-	main()
+    rus = RunUntilSuccess()
+    rus.start()
